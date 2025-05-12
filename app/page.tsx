@@ -1,10 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { ArrowRight, Menu, DoorClosedIcon as Close } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { useState, useEffect, useRef } from "react"
+import { ArrowRight } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import ComparisonCarousel from "./comparison-carousel"
@@ -15,17 +12,44 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showIntro, setShowIntro] = useState(true)
+  const [animatedElements, setAnimatedElements] = useState<string[]>([])
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
+      setScrolled(window.scrollY > 20)
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Adiciona a classe para prevenir scroll durante a animação
+  // Animation observer setup
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target.id) {
+            setAnimatedElements((prev) => [...prev, entry.target.id])
+          }
+        })
+      },
+      { threshold: 0.1 },
+    )
+
+    const elements = document.querySelectorAll(".stagger-item")
+    elements.forEach((el) => {
+      if (observerRef.current) observerRef.current.observe(el)
+    })
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    }
+  }, [showIntro])
+
+  // Prevent scroll during intro animation
   useEffect(() => {
     if (showIntro) {
       document.body.style.overflow = "hidden"
@@ -45,146 +69,55 @@ export default function Home() {
   return (
     <div className="relative w-full">
       {/* Microsoft for Startups Sub-header */}
-      <div className="bg-[#f0f0f0] py-[0.4em] border-b border-black text-center text-[0.7em] font-mono font-bold sticky top-0 z-50">
-        Microsoft for Startups Founders Hub Member
+      <div className="bg-[#f5f5f5] py-[0.6em] text-center text-[0.85em] font-body text-gray-700 sticky top-0 z-50 border-b border-gray-200">
+        <span className="flex items-center justify-center gap-2">
+          Proud member of <img src="/microsoft-logo.png" alt="Microsoft" className="h-[1.2em]" /> Microsoft for Startups
+          Founders Hub
+        </span>
       </div>
 
       {/* Header */}
       <header
         className={cn(
-          "border-b border-black sticky top-[1.8em] z-40 bg-white/80 backdrop-blur-xl transition-all duration-300",
-          scrolled ? "py-[0.4rem]" : "py-[0.8rem]",
+          "bg-white sticky top-[2.3em] z-40 transition-all duration-300 border-b border-gray-200",
+          scrolled ? "py-[0.8rem]" : "py-[1.2rem]",
         )}
       >
-        <div className="w-[92%] mx-auto flex items-center justify-between">
-          <div
-            className={cn(
-              "font-black tracking-tight transition-all duration-300 font-mono",
-              scrolled ? "text-[1em]" : "text-[1.3em] sm:text-[1.5em] md:text-[1.7em]",
-            )}
-          >
-            HEALTH/HEALTH
-          </div>
-
-          <nav className="hidden md:flex gap-[2em]">
-            <Link
-              href="#features"
-              className="text-[0.8em] font-bold font-mono hover:underline underline-offset-4 decoration-2"
-            >
-              RECURSOS
-            </Link>
-            <Link
-              href="#comparison"
-              className="text-[0.8em] font-bold font-mono hover:underline underline-offset-4 decoration-2"
-            >
-              COMPARAÇÃO
-            </Link>
-            <Link
-              href="#developers"
-              className="text-[0.8em] font-bold font-mono hover:underline underline-offset-4 decoration-2"
-            >
-              DESENVOLVEDORES
-            </Link>
-            <Link
-              href="#investors"
-              className="text-[0.8em] font-bold font-mono hover:underline underline-offset-4 decoration-2"
-            >
-              INVESTIDORES
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-[1em]">
-            <Button className="hidden md:flex bg-black text-white hover:bg-black/90 rounded-none font-bold text-[0.8em] py-[0.5em] px-[0.9em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-              SOLICITAR ACESSO
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <Close /> : <Menu />}
-            </Button>
+        <div className="container mx-auto flex items-center justify-center">
+          <div className="font-black tracking-tight transition-all duration-300 font-header text-center text-[1.5em]">
+            <span className="text-[#0d2b4e]">HEALTH</span>
+            <span className="text-[#2a9d8f]">/HEALTH</span>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-black z-40">
-            <nav className="flex flex-col p-[1em]">
-              <Link
-                href="#features"
-                className="py-[0.75em] border-b border-black/20 font-bold font-mono text-[0.8em]"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                RECURSOS
-              </Link>
-              <Link
-                href="#comparison"
-                className="py-[0.75em] border-b border-black/20 font-bold font-mono text-[0.8em]"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                COMPARAÇÃO
-              </Link>
-              <Link
-                href="#developers"
-                className="py-[0.75em] border-b border-black/20 font-bold font-mono text-[0.8em]"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                DESENVOLVEDORES
-              </Link>
-              <Link
-                href="#investors"
-                className="py-[0.75em] font-bold font-mono text-[0.8em]"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                INVESTIDORES
-              </Link>
-              <Button className="mt-[1em] bg-black text-white hover:bg-black/90 rounded-none w-full font-bold text-[0.8em] py-[0.6em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                SOLICITAR ACESSO
-              </Button>
-            </nav>
-          </div>
-        )}
       </header>
 
       <main>
         {/* Hero Section */}
-        <section className="py-[8%] border-b border-black">
-          <div className="w-[92%] mx-auto flex flex-col items-center text-center">
-            <div className="inline-block px-[0.75em] py-[0.25em] mb-[1.5em] text-[0.8em] border border-black bg-white/50 backdrop-blur-xl font-mono font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
+        <section className="section gradient-subtle-1">
+          <div className="container mx-auto flex flex-col items-center text-center">
+            <div className="inline-block px-[0.75em] py-[0.25em] mb-[2em] text-[0.8em] bg-white/50 backdrop-blur-xl font-mono font-medium rounded-md premium-border">
               healthhealth.io
             </div>
-            <h1 className="text-[1.8em] sm:text-[2.2em] md:text-[2.6em] font-black tracking-tighter max-w-[90%] mb-[0.5em] leading-tight font-mono">
-              HEALTH/HEALTH transforma a conversa clínica em prontuário completo. Automático. Imediato. Seguro.
+            <h1 className="section-title max-w-[80%] mb-[0.8em]">
+              HEALTH/HEALTH transforma a conversa clínica em prontuário completo.
             </h1>
-            <p className="text-[1em] sm:text-[1.2em] md:text-[1.3em] text-black/80 max-w-[90%] mb-[0.5em] font-header">
-              Sem digitação. Sem formulário. Sem perda de tempo.
+            <p className="section-subtitle mb-[1em]">Automático. Imediato. Seguro.</p>
+            <p className="text-[1em] text-black/70 max-w-[70%] mb-[3em] font-body">
+              Sem digitação. Sem formulário. Sem perda de tempo. Você fala com seu paciente — a plataforma escuta,
+              analisa e gera a documentação clínica por você.
             </p>
-            <p className="text-[0.9em] text-black/80 max-w-[90%] mb-[2em] font-body">
-              Você fala com seu paciente — a plataforma escuta, analisa e gera a documentação clínica por você.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-[1em] w-full max-w-[90%] justify-center">
-              <Button className="bg-black text-white hover:bg-black/90 text-[0.8em] py-[0.9em] px-[1.3em] rounded-none font-bold font-mono w-full sm:w-auto shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                SOLICITAR DEMONSTRAÇÃO
-              </Button>
-              <Button
-                variant="outline"
-                className="border border-black hover:bg-black/5 text-[0.8em] py-[0.9em] px-[1.3em] rounded-none font-bold font-mono w-full sm:w-auto shadow-[1px_1px_0px_0px_rgba(0,0,0,0.1)]"
-              >
-                SAIBA MAIS
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-[1.2em] w-full max-w-[80%] justify-center">
+              <button className="premium-button w-full sm:w-auto">SOLICITAR DEMONSTRAÇÃO</button>
+              <button className="premium-outline-button w-full sm:w-auto">SAIBA MAIS</button>
             </div>
           </div>
         </section>
 
         {/* Core Functionality Section */}
-        <section id="features" className="py-[8%] border-b border-black bg-black/5">
-          <div className="w-[92%] mx-auto">
-            <h2 className="text-[1.6em] md:text-[2em] font-black text-center mb-[1.5em] font-mono">
-              O QUE O HEALTH/HEALTH FAZ?
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[1em]">
+        <section id="features" className="section gradient-subtle-2">
+          <div className="container mx-auto">
+            <h2 className="section-title text-center mb-[2.5em]">O QUE O HEALTH/HEALTH FAZ?</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[1.5em]">
               {[
                 {
                   icon: <BrutalistIcons.Mic />,
@@ -212,30 +145,31 @@ export default function Home() {
                   description: "Garante confidencialidade dos dados e alta precisão na documentação médica.",
                 },
               ].map((feature, index) => (
-                <Card
+                <div
                   key={index}
-                  className="backdrop-blur-2xl bg-white/60 border border-black p-[1.1em] hover:shadow-lg transition-all rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]"
+                  id={`feature-${index}`}
+                  className={cn(
+                    "feature-card stagger-item",
+                    animatedElements.includes(`feature-${index}`) && "animate-fadeIn",
+                  )}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-[2.8em] h-[2.8em] flex items-center justify-center bg-black text-white mb-[0.8em] shadow-[1px_1px_0px_0px_rgba(0,0,0,0.15)]">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-[1.1em] font-bold mb-[0.5em] font-mono">{feature.title}</h3>
-                    <p className="text-black/70 font-body text-[0.8em]">{feature.description}</p>
+                    <div className="feature-icon bg-[#0d2b4e] text-white">{feature.icon}</div>
+                    <h3 className="feature-title">{feature.title}</h3>
+                    <p className="feature-description">{feature.description}</p>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
         {/* Comparison Carousel Section */}
-        <section id="comparison" className="py-[8%] border-b border-black">
-          <div className="w-[92%] mx-auto">
-            <h2 className="text-[1.6em] md:text-[2em] font-black text-center mb-[1.5em] font-mono">
-              HEALTH/HEALTH vs. CONCORRENTES
-            </h2>
-            <p className="text-center text-[0.9em] text-black/70 mb-[2em] max-w-[90%] mx-auto font-body">
+        <section id="comparison" className="section">
+          <div className="container mx-auto">
+            <h2 className="section-title text-center">HEALTH/HEALTH vs. CONCORRENTES</h2>
+            <p className="section-subtitle text-center mx-auto">
               Veja como o HEALTH/HEALTH se compara com outras soluções de documentação disponíveis no mercado.
             </p>
 
@@ -244,139 +178,123 @@ export default function Home() {
         </section>
 
         {/* Sections for Developers and Investors */}
-        <section className="border-b border-black">
+        <section className="section gradient-subtle-3">
           <Tabs defaultValue="developers" className="w-full">
-            <div className="w-[92%] mx-auto py-[8%]">
-              <TabsList className="grid w-full grid-cols-2 mb-[2em] rounded-none">
+            <div className="container mx-auto">
+              <TabsList className="grid w-full max-w-[600px] mx-auto grid-cols-2 mb-[3em] rounded-md overflow-hidden premium-border">
                 <TabsTrigger
                   value="developers"
                   id="developers"
-                  className="data-[state=active]:bg-black data-[state=active]:text-white rounded-none border border-black data-[state=inactive]:bg-white font-mono font-bold py-[0.8em] text-[0.75em] sm:text-[0.8em]"
+                  className="data-[state=active]:bg-[#0d2b4e] data-[state=active]:text-white rounded-none data-[state=inactive]:bg-white font-header font-medium py-[1em] text-[0.8em] transition-all duration-300"
                 >
                   PARA DESENVOLVEDORES
                 </TabsTrigger>
                 <TabsTrigger
                   value="investors"
                   id="investors"
-                  className="data-[state=active]:bg-black data-[state=active]:text-white rounded-none border border-black data-[state=inactive]:bg-white font-mono font-bold py-[0.8em] text-[0.75em] sm:text-[0.8em]"
+                  className="data-[state=active]:bg-[#0d2b4e] data-[state=active]:text-white rounded-none data-[state=inactive]:bg-white font-header font-medium py-[1em] text-[0.8em] transition-all duration-300"
                 >
                   PARA INVESTIDORES
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="developers" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2em]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[3em]">
                   <div>
-                    <h3 className="text-[1.4em] font-black mb-[1em] font-mono">JUNTE-SE AO NOSSO TIME</h3>
-                    <p className="text-[0.9em] mb-[1em] font-body">
+                    <h3 className="text-[1.6em] font-black mb-[1.2em] font-header">JUNTE-SE AO NOSSO TIME</h3>
+                    <p className="text-[1em] mb-[1.5em] font-body text-black/80 leading-relaxed">
                       Estamos construindo a próxima geração de ferramentas para profissionais de saúde e precisamos de
                       talentos excepcionais para nos ajudar a transformar a documentação médica.
                     </p>
-                    <div className="space-y-[1.5em] mb-[1.5em]">
-                      <div className="border border-black p-[1em] bg-white/60 backdrop-blur-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
-                        <h4 className="text-[1em] font-bold mb-[0.5em] font-mono">ENGENHEIRO DE ML/IA</h4>
-                        <p className="text-[0.8em] text-black/70 mb-[0.8em] font-body">
+                    <div className="space-y-[2em] mb-[2em]">
+                      <div className="premium-card p-[1.5em]">
+                        <h4 className="feature-title">ENGENHEIRO DE ML/IA</h4>
+                        <p className="feature-description mb-[1.2em]">
                           Trabalhe com modelos de linguagem avançados e processamento de áudio para melhorar nossa
                           tecnologia de transcrição e análise médica.
                         </p>
-                        <Button
-                          variant="outline"
-                          className="text-[0.75em] py-[0.5em] px-[0.8em] border border-black rounded-none font-mono font-bold"
-                        >
-                          SAIBA MAIS
-                        </Button>
+                        <button className="premium-outline-button text-[0.8em]">SAIBA MAIS</button>
                       </div>
 
-                      <div className="border border-black p-[1em] bg-white/60 backdrop-blur-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
-                        <h4 className="text-[1em] font-bold mb-[0.5em] font-mono">DESENVOLVEDOR FULL-STACK</h4>
-                        <p className="text-[0.8em] text-black/70 mb-[0.8em] font-body">
+                      <div className="premium-card p-[1.5em]">
+                        <h4 className="feature-title">DESENVOLVEDOR FULL-STACK</h4>
+                        <p className="feature-description mb-[1.2em]">
                           Construa interfaces intuitivas e sistemas robustos que conectam médicos a nossa tecnologia de
                           documentação automatizada.
                         </p>
-                        <Button
-                          variant="outline"
-                          className="text-[0.75em] py-[0.5em] px-[0.8em] border border-black rounded-none font-mono font-bold"
-                        >
-                          SAIBA MAIS
-                        </Button>
+                        <button className="premium-outline-button text-[0.8em]">SAIBA MAIS</button>
                       </div>
                     </div>
-                    <Button className="bg-black text-white hover:bg-black/90 rounded-none font-mono font-bold text-[0.8em] py-[0.8em] px-[1.5em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                      VER TODAS AS VAGAS
-                    </Button>
+                    <button className="premium-button">VER TODAS AS VAGAS</button>
                   </div>
-                  <div className="bg-black/5 p-[1.5em] border border-black backdrop-blur-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
-                    <h4 className="text-[1.2em] font-black mb-[1em] font-mono">NOSSO STACK TECNOLÓGICO</h4>
-                    <div className="grid grid-cols-2 gap-[1em] mb-[1.5em]">
+                  <div className="premium-card p-[2em]">
+                    <h4 className="text-[1.4em] font-black mb-[1.2em] font-header">NOSSO STACK TECNOLÓGICO</h4>
+                    <div className="grid grid-cols-2 gap-[1em] mb-[2em]">
                       {["Python", "TypeScript", "React", "Next.js", "PyTorch", "TensorFlow", "AWS", "Azure"].map(
                         (tech, index) => (
                           <div
                             key={index}
-                            className="border border-black bg-white/80 p-[0.8em] text-center font-mono text-[0.8em] font-bold shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
+                            className="bg-white/80 p-[1em] text-center font-mono text-[0.8em] font-medium rounded-md premium-border"
                           >
                             {tech}
                           </div>
                         ),
                       )}
                     </div>
-                    <p className="text-[0.8em] text-black/70 font-body mb-[1em]">
+                    <p className="feature-description mb-[1.5em]">
                       Trabalhamos com tecnologias de ponta para criar soluções inovadoras que transformam a prática
                       médica. Nossa equipe é remota e distribuída globalmente.
                     </p>
-                    <Button className="w-full bg-black text-white hover:bg-black/90 rounded-none font-mono font-bold text-[0.8em] py-[0.8em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                      ENVIAR CURRÍCULO
-                    </Button>
+                    <button className="premium-button w-full">ENVIAR CURRÍCULO</button>
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="investors" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2em]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[3em]">
                   <div>
-                    <h3 className="text-[1.4em] font-black mb-[1em] font-mono">OPORTUNIDADE DE INVESTIMENTO</h3>
-                    <p className="text-[0.9em] mb-[1em] font-body">
+                    <h3 className="text-[1.6em] font-black mb-[1.2em] font-header">OPORTUNIDADE DE INVESTIMENTO</h3>
+                    <p className="text-[1em] mb-[1.5em] font-body text-black/80 leading-relaxed">
                       HEALTH/HEALTH representa uma solução inovadora para um problema crítico no setor de saúde: a
                       documentação médica eficiente e precisa.
                     </p>
-                    <ul className="space-y-[1em] mb-[1.5em]">
+                    <ul className="space-y-[1.2em] mb-[2em]">
                       {[
                         "Mercado potencial de US$ 15 bilhões globalmente",
                         "Tecnologia proprietária com múltiplas patentes pendentes",
                         "Modelo de negócio SaaS com alta retenção de clientes",
                         "Equipe fundadora com experiência médica e tecnológica",
                       ].map((item, index) => (
-                        <li key={index} className="flex items-start gap-[0.5em]">
-                          <div className="w-[0.8em] h-[0.8em] border border-black bg-black mt-[0.2em] flex-shrink-0"></div>
-                          <span className="font-body text-[0.8em]">{item}</span>
+                        <li key={index} className="flex items-start gap-[0.8em]">
+                          <div className="w-[0.5em] h-[0.5em] bg-[#0d2b4e] rounded-full mt-[0.5em] flex-shrink-0"></div>
+                          <span className="font-body text-[0.9em] text-black/80">{item}</span>
                         </li>
                       ))}
                     </ul>
-                    <Button className="bg-black text-white hover:bg-black/90 rounded-none font-mono font-bold text-[0.8em] py-[0.8em] px-[1.5em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                      DECK PARA INVESTIDORES
-                    </Button>
+                    <button className="premium-button">DECK PARA INVESTIDORES</button>
                   </div>
-                  <div className="bg-black/5 p-[1.5em] border border-black backdrop-blur-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
-                    <h4 className="text-[1.2em] font-black mb-[1em] font-mono">MÉTRICAS-CHAVE</h4>
-                    <div className="space-y-[1.2em]">
+                  <div className="premium-card p-[2em]">
+                    <h4 className="text-[1.4em] font-black mb-[1.2em] font-header">MÉTRICAS-CHAVE</h4>
+                    <div className="space-y-[1.5em]">
                       {[
                         { label: "CRESCIMENTO MoM", value: "22%", width: "22%" },
                         { label: "RETENÇÃO", value: "94%", width: "94%" },
                         { label: "NPS", value: "87", width: "87%" },
                       ].map((metric, index) => (
                         <div key={index}>
-                          <div className="flex justify-between mb-[0.4em]">
-                            <span className="font-bold font-mono text-[0.8em]">{metric.label}</span>
-                            <span className="font-black font-mono text-[0.8em]">{metric.value}</span>
+                          <div className="flex justify-between mb-[0.6em]">
+                            <span className="font-medium font-header text-[0.9em]">{metric.label}</span>
+                            <span className="font-black font-header text-[0.9em]">{metric.value}</span>
                           </div>
-                          <div className="w-full bg-black/10 h-[0.6em] border border-black">
-                            <div className="bg-black h-full" style={{ width: metric.width }}></div>
+                          <div className="w-full bg-black/5 h-[0.6em] rounded-full overflow-hidden">
+                            <div className="bg-[#0d2b4e] h-full rounded-full" style={{ width: metric.width }}></div>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="mt-[1.5em] p-[1em] border border-black bg-white/70 backdrop-blur-xl shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]">
-                      <h5 className="font-bold font-mono text-[0.9em] mb-[0.5em]">PRÓXIMA RODADA</h5>
-                      <p className="text-[0.8em] text-black/70 font-body">
+                    <div className="mt-[2em] p-[1.5em] bg-white/70 rounded-lg premium-border">
+                      <h5 className="font-bold font-header text-[1em] mb-[0.8em]">PRÓXIMA RODADA</h5>
+                      <p className="feature-description">
                         Estamos levantando uma rodada Seed de US$ 2M para expandir nossa equipe de desenvolvimento e
                         iniciar operações em novos mercados.
                       </p>
@@ -389,54 +307,45 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-[8%]">
-          <div className="w-[92%] mx-auto">
-            <div className="max-w-[90%] mx-auto text-center">
-              <h2 className="text-[1.6em] md:text-[2em] font-black mb-[1em] font-mono">
+        <section className="section">
+          <div className="container mx-auto">
+            <div className="max-w-[70%] mx-auto text-center">
+              <h2 className="section-title mb-[1.2em]">
                 HEALTH/HEALTH não é uma IA de reunião. É uma extensão do seu raciocínio clínico.
               </h2>
-              <p className="text-[0.9em] text-black/70 mb-[2em] font-body">
+              <p className="section-subtitle mb-[2.5em]">
                 Junte-se aos profissionais de saúde que estão transformando sua prática clínica com documentação
                 automática e inteligente.
               </p>
-              <Button className="bg-black text-white hover:bg-black/90 text-[0.8em] px-[1.3em] py-[0.9em] rounded-none flex items-center gap-[0.5em] mx-auto font-bold font-mono shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
+              <button className="premium-button flex items-center gap-[0.8em] mx-auto">
                 SOLICITAR DEMONSTRAÇÃO <ArrowRight className="w-[0.9em] h-[0.9em]" />
-              </Button>
+              </button>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="py-[5%] border-t border-black bg-black/5">
-        <div className="w-[92%] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-[1.5em]">
-            <div className="font-black text-[1.1em] font-mono">HEALTH/HEALTH</div>
+      <footer className="py-[5%] bg-[#f5f5f5]">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-[2em]">
+            <div className="font-black text-[1.2em] font-header">
+              <span className="text-[#0d2b4e]">HEALTH</span>
+              <span className="text-[#2a9d8f]">/HEALTH</span>
+            </div>
 
             <div className="text-center md:text-left">
-              <p className="text-[0.75em] text-black/70 mb-[0.2em] font-header">
+              <p className="text-[0.8em] text-black/70 mb-[0.3em] font-header">
                 Desenvolvido por médicos para médicos.
               </p>
-              <p className="text-[0.75em] text-black/70 mb-[0.2em] font-header">Plataforma em construção contínua.</p>
-              <p className="text-[0.75em] text-black/70 font-mono font-bold">
+              <p className="text-[0.8em] text-black/70 mb-[0.3em] font-header">Plataforma em construção contínua.</p>
+              <p className="text-[0.8em] text-black/70 font-mono font-medium">
                 healthhealth.io — uma ferramenta IREAJE.CLOUD
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-[0.8em] justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border border-black hover:bg-black/5 rounded-none font-mono text-[0.65em] font-bold shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
-              >
-                POLÍTICA DE PRIVACIDADE
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border border-black hover:bg-black/5 rounded-none font-mono text-[0.65em] font-bold shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
-              >
-                TERMOS DE USO
-              </Button>
+            <div className="flex flex-wrap gap-[1em] justify-center">
+              <button className="premium-outline-button text-[0.7em]">POLÍTICA DE PRIVACIDADE</button>
+              <button className="premium-outline-button text-[0.7em]">TERMOS DE USO</button>
             </div>
           </div>
         </div>

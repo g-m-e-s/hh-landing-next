@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 // Dados de comparação com ferramentas reais
@@ -74,27 +72,27 @@ const comparisonData = [
 // Logos/ícones para cada competidor (simplificados para este exemplo)
 const competitorLogos = {
   "HEALTH/HEALTH": (
-    <div className="flex items-center gap-[0.3em]">
-      <div className="w-[0.8em] h-[0.8em] border border-black"></div>
-      <span className="font-black font-mono text-[0.7em]">HEALTH/HEALTH</span>
+    <div className="flex items-center gap-[0.5em]">
+      <div className="w-[0.8em] h-[0.8em] bg-[#0d2b4e] rounded-sm"></div>
+      <span className="font-bold font-header text-[0.8em]">HEALTH/HEALTH</span>
     </div>
   ),
   "Dragon Copilot": (
-    <div className="flex items-center gap-[0.3em]">
-      <div className="w-[0.8em] h-[0.8em] border border-black"></div>
-      <span className="font-bold text-[0.65em] font-mono">Dragon Copilot</span>
+    <div className="flex items-center gap-[0.5em]">
+      <div className="w-[0.8em] h-[0.8em] bg-gray-300 rounded-sm"></div>
+      <span className="font-medium font-header text-[0.75em]">Dragon Copilot</span>
     </div>
   ),
   "Read.AI": (
-    <div className="flex items-center gap-[0.3em]">
-      <div className="w-[0.8em] h-[0.8em] border border-black"></div>
-      <span className="font-bold text-[0.65em] font-mono">Read.AI</span>
+    <div className="flex items-center gap-[0.5em]">
+      <div className="w-[0.8em] h-[0.8em] bg-gray-300 rounded-sm"></div>
+      <span className="font-medium font-header text-[0.75em]">Read.AI</span>
     </div>
   ),
   "Google Meet/Zoom": (
-    <div className="flex items-center gap-[0.3em]">
-      <div className="w-[0.8em] h-[0.8em] border border-black"></div>
-      <span className="font-bold text-[0.65em] font-mono">Google Meet/Zoom</span>
+    <div className="flex items-center gap-[0.5em]">
+      <div className="w-[0.8em] h-[0.8em] bg-gray-300 rounded-sm"></div>
+      <span className="font-medium font-header text-[0.75em]">Google Meet/Zoom</span>
     </div>
   ),
 }
@@ -102,11 +100,11 @@ const competitorLogos = {
 // Componente para renderizar o valor da comparação
 const ComparisonValue = ({ value }: { value: boolean | string }) => {
   if (value === true) {
-    return <div className="w-[0.8em] h-[0.8em] border border-green-600"></div>
+    return <div className="w-[1em] h-[1em] bg-green-500 rounded-full"></div>
   } else if (value === false) {
-    return <div className="w-[0.8em] h-[0.8em] border border-red-600"></div>
+    return <div className="w-[1em] h-[1em] bg-red-400 rounded-full"></div>
   } else {
-    return <div className="w-[0.8em] h-[0.8em] border border-orange-500"></div>
+    return <div className="w-[1em] h-[1em] bg-orange-400 rounded-full"></div>
   }
 }
 
@@ -148,7 +146,7 @@ export default function ComparisonCarousel() {
   const currentFeature = comparisonData[currentIndex]
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-[900px] mx-auto">
       <div className="relative overflow-hidden">
         <div
           className={cn(
@@ -157,104 +155,90 @@ export default function ComparisonCarousel() {
             isAnimating && direction === "right" && "translate-x-[5%] opacity-0",
           )}
         >
-          <Card className="backdrop-blur-2xl bg-white/60 border border-black rounded-none p-[1.2em] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
-            <div className="mb-[1em]">
-              <h3 className="text-[1.1em] font-black mb-[0.3em] font-mono">{currentFeature.feature}</h3>
-              <p className="text-[0.75em] text-black/70 font-body">{currentFeature.description}</p>
+          <div className="premium-card p-[2em]">
+            <div className="mb-[1.5em]">
+              <h3 className="feature-title text-[1.3em] mb-[0.5em]">{currentFeature.feature}</h3>
+              <p className="feature-description">{currentFeature.description}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[1em]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5em]">
               {currentFeature.competitors.map((competitor, idx) => (
                 <div
                   key={idx}
                   className={cn(
-                    "border p-[0.8em] rounded-none flex flex-col",
+                    "p-[1.2em] rounded-lg flex flex-col transition-all duration-300",
                     competitor.name === "HEALTH/HEALTH"
-                      ? "border-black bg-black/5 order-first md:col-span-2 md:order-none shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
-                      : "border-black/30 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.05)]",
+                      ? "bg-[#0d2b4e]/5 order-first md:col-span-2 md:order-none premium-border"
+                      : "bg-white/80 premium-border",
                   )}
                 >
-                  <div className="flex justify-between items-center mb-[0.5em]">
+                  <div className="flex justify-between items-center mb-[0.8em]">
                     <div className="font-bold">{competitorLogos[competitor.name as keyof typeof competitorLogos]}</div>
                     <ComparisonValue value={competitor.value} />
                   </div>
-                  <p className="text-[0.65em] text-black/70 mt-auto font-body">{competitor.note}</p>
+                  <p className="text-[0.8em] text-black/70 mt-auto font-body">{competitor.note}</p>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-between items-center mt-[1em]">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={goToPrevious}
-                className="border border-black p-[0.3em] hover:bg-black hover:text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
-              >
-                <ChevronLeft className="w-[0.9em] h-[0.9em]" />
+            <div className="flex justify-between items-center mt-[2em]">
+              <button onClick={goToPrevious} className="premium-outline-button p-[0.5em] rounded-full">
+                <ChevronLeft className="w-[1em] h-[1em]" />
                 <span className="sr-only">Anterior</span>
-              </Button>
+              </button>
 
-              <div className="flex gap-[0.4em]">
+              <div className="flex gap-[0.6em]">
                 {comparisonData.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => goToSlide(idx)}
                     className={cn(
-                      "w-[0.4em] h-[0.4em] border border-black transition-all",
-                      idx === currentIndex ? "bg-black" : "bg-white hover:bg-black/20",
+                      "w-[0.5em] h-[0.5em] rounded-full transition-all",
+                      idx === currentIndex ? "bg-[#0d2b4e]" : "bg-black/20 hover:bg-black/40",
                     )}
                     aria-label={`Ir para slide ${idx + 1}`}
                   />
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={goToNext}
-                className="border border-black p-[0.3em] hover:bg-black hover:text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,0.08)]"
-              >
-                <ChevronRight className="w-[0.9em] h-[0.9em]" />
+              <button onClick={goToNext} className="premium-outline-button p-[0.5em] rounded-full">
+                <ChevronRight className="w-[1em] h-[1em]" />
                 <span className="sr-only">Próximo</span>
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
 
         <div className="absolute top-[50%] left-[0.5em] -translate-y-1/2 z-10">
-          <Button
-            variant="outline"
-            size="icon"
+          <button
             onClick={goToPrevious}
-            className="border border-black bg-white/80 backdrop-blur-md p-[0.3em] hover:bg-black hover:text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,0.1)]"
+            className="premium-outline-button p-[0.5em] rounded-full bg-white/90 backdrop-blur-md"
           >
-            <ChevronLeft className="w-[0.9em] h-[0.9em]" />
+            <ChevronLeft className="w-[1em] h-[1em]" />
             <span className="sr-only">Anterior</span>
-          </Button>
+          </button>
         </div>
 
         <div className="absolute top-[50%] right-[0.5em] -translate-y-1/2 z-10">
-          <Button
-            variant="outline"
-            size="icon"
+          <button
             onClick={goToNext}
-            className="border border-black bg-white/80 backdrop-blur-md p-[0.3em] hover:bg-black hover:text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,0.1)]"
+            className="premium-outline-button p-[0.5em] rounded-full bg-white/90 backdrop-blur-md"
           >
-            <ChevronRight className="w-[0.9em] h-[0.9em]" />
+            <ChevronRight className="w-[1em] h-[1em]" />
             <span className="sr-only">Próximo</span>
-          </Button>
+          </button>
         </div>
       </div>
 
-      <div className="flex justify-center mt-[0.8em]">
-        <div className="flex gap-[0.4em]">
+      <div className="flex justify-center mt-[1.5em]">
+        <div className="flex gap-[0.6em]">
           {comparisonData.map((_, idx) => (
             <button
               key={idx}
               onClick={() => goToSlide(idx)}
               className={cn(
-                "w-[0.4em] h-[0.4em] border border-black transition-all",
-                idx === currentIndex ? "bg-black" : "bg-white hover:bg-black/20",
+                "w-[0.5em] h-[0.5em] rounded-full transition-all",
+                idx === currentIndex ? "bg-[#0d2b4e]" : "bg-black/20 hover:bg-black/40",
               )}
               aria-label={`Ir para slide ${idx + 1}`}
             />
